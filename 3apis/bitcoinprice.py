@@ -23,3 +23,8 @@ plt.legend('BTC-USD')
 plt.xlabel('Date')
 plt.ylabel('Price')
 plt.show()
+
+BTC = yf.Ticker("BTC-USD")
+price = BTC.info['regularMarketPrice']
+print(price)
+ 

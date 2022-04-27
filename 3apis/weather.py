@@ -10,7 +10,7 @@ import json
 
 def get_current_temp(city, country):
     APIKEY = ''
-    city = 'Boston'
+    city = 'Boston' 
     country_code = 'us'
     url = f'http://api.openweathermap.org/data/2.5/weather?q={city},{country_code}&APPID={APIKEY}'
     f = urllib.request.urlopen(url)
