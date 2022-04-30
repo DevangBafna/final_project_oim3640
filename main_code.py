@@ -28,7 +28,6 @@ connector.execute(
 
 # Inserting a dummy user for other users to login and after login they can change their details
 connector.execute('INSERT INTO users (username, password, budget, location) VALUES (?,?,?,?)', ('testuser', 'testpassword', 500, 'Wellesley'))
-
 connector.commit()
 
 # Creating the universal font variables
