@@ -480,6 +480,7 @@ def remove_record():
 
         mb.showinfo('Done!', 'The record was successfully deleted!')
 
+        update_budget_label()
         display_records_table()
 
 # Add expenses to the table
