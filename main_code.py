@@ -7,9 +7,9 @@ import sqlite3
 import urllib.request
 import json
 from config import API_KEY
-import pandas_datareader as pdr
-from matplotlib import pyplot as plt
-import yfinance as yf
+import pandas_datareader as pdr # pip install pandas_datareader
+from matplotlib import pyplot as plt # pip install matplotlib
+import yfinance as yf # pip install yfinance
 from matplotlib import rcParams
 from datetime import datetime
 from collections import defaultdict
