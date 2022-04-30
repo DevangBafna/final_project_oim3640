@@ -1,4 +1,3 @@
-from cProfile import label
 import datetime
 from tkinter import *
 import tkinter.messagebox as mb
@@ -15,7 +14,6 @@ from matplotlib import rcParams
 from datetime import datetime
 from collections import defaultdict
 from urllib.error import HTTPError
-from PIL import Image
 
 # Database connection
 connector = sqlite3.connect('ExpenseTracker.db')
