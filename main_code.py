@@ -50,7 +50,8 @@ def get_current_temp(city):
 
     APIKEY = API_KEY
     country_code = 'us'
-    url = f'http://api.openweathermap.org/data/2.5/weather?q={city},{country_code}&APPID={APIKEY}'
+    city_for_result = city.replace(' ', '%20')
+    url = f'http://api.openweathermap.org/data/2.5/weather?q={city_for_result},{country_code}&APPID={APIKEY}'
     f = urllib.request.urlopen(url)
     response_text = f.read().decode('utf-8')
     response_data = json.loads(response_text)
@@ -226,7 +227,7 @@ def update_details():
                 update_budget_label()
                 display_records_table()
             else:
-                mb.showerror('Error!','The type of the values entered is not accurate. Please try again!')
+                mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
                 reset_fields()
 
     elif not new_username and not new_password and not new_budget:
@@ -237,6 +238,74 @@ def update_details():
             update_location_label()
             display_records_table()
             
+    elif new_username and new_password and not new_budget and not new_location :
+                connector.execute('UPDATE users SET username = ? WHERE user_id = 1', [new_username])
+                connector.execute('UPDATE users SET password = ? WHERE user_id = 1', [new_password])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                display_records_table()
+    
+    elif new_username and new_budget and not new_password and not new_location :
+        if new_budget.isdigit():
+                connector.execute('UPDATE users SET username = ? WHERE user_id = 1', [new_username])
+                connector.execute('UPDATE users SET budget = ? WHERE user_id = 1', [new_budget])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                update_budget_label()
+                display_records_table()
+        else:
+            mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
+            reset_fields()
+
+    elif new_username and new_location and not new_budget and not new_password:
+                connector.execute('UPDATE users SET username = ? WHERE user_id = 1', [new_username])
+                connector.execute('UPDATE users SET location = ? WHERE user_id = 1', [new_location])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                update_location_label()
+                display_records_table()
+
+    elif new_password and new_budget and not new_username and not new_location:
+        if new_budget.isdigit():
+                connector.execute('UPDATE users SET username = ? WHERE user_id = 1', [new_username])
+                connector.execute('UPDATE users SET password = ? WHERE user_id = 1', [new_password])
+                connector.execute('UPDATE users SET budget = ? WHERE user_id = 1', [new_budget])
+                connector.execute('UPDATE users SET location = ? WHERE user_id = 1', [new_location])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                update_budget_label()
+                display_records_table()
+        else:
+            mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
+            reset_fields()
+
+    elif new_password and new_location and not new_budget and not new_username:
+                connector.execute('UPDATE users SET password = ? WHERE user_id = 1', [new_password])
+                connector.execute('UPDATE users SET location = ? WHERE user_id = 1', [new_location])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                update_location_label()
+                display_records_table()
+
+    elif new_budget and new_location and not new_password and not new_username:
+        if new_budget.isdigit():
+                connector.execute('UPDATE users SET budget = ? WHERE user_id = 1', [new_budget])
+                connector.execute('UPDATE users SET location = ? WHERE user_id = 1', [new_location])
+                connector.commit()
+                mb.showinfo('Done!', 'All details were successfully updated')
+                reset_fields()
+                update_budget_label()
+                update_location_label()
+                display_records_table()
+        else:
+            mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
+            reset_fields()
+
     elif new_username and new_password and new_budget and new_location:
         if new_budget.isdigit():
                 connector.execute('UPDATE users SET username = ? WHERE user_id = 1', [new_username])
@@ -250,7 +319,7 @@ def update_details():
                 update_location_label()
                 display_records_table()
         else:
-            mb.showerror('Error!','The type of the values entered is not accurate. Please try again!')
+            mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
             reset_fields()
             
 # Logout
@@ -321,6 +390,8 @@ def show_frame_after_login():
         budget_label.place(relx=0.5, rely = 0.88, anchor=CENTER)
         over_under_label.place(relx=0.5, rely = 0.92, anchor=CENTER)
 
+        update_budget_label()
+
 # Update location after update button
 def update_location_label():
     '''This function will update the display of location and temperature after the user has updated their current location'''
@@ -343,7 +414,10 @@ def update_budget_label():
     total_spending = connector.execute('SELECT SUM(amount) FROM expenses').fetchall()
     budget_label['text'] = f'Current Budget: ${current_budget}, Total Spending: ${total_spending[0][0]}'
 
-    if current_budget > total_spending[0][0]:
+    if total_spending[0][0] == None:
+        over_under_label.config(foreground='Black')
+        over_under_label['text'] = 'Over or Under Budget?'
+    elif current_budget > total_spending[0][0]:
         over_under_label.config(foreground='DarkGreen')
         over_under_label['text'] = 'Under Budget'
     elif current_budget < total_spending[0][0]:
@@ -393,7 +467,7 @@ def display_records_table():
 def remove_record():
     '''This function will remove a record from the table once the user has clicked which one to remove and after clicking delete expense button'''
     if not tree.selection():
-        mb.showerror('Error!', 'Please select an item from the database')
+        mb.showerror('Error!', 'Please select an item from the expense table')
     else:
         current_item = tree.focus()
         values = tree.item(current_item)
@@ -433,8 +507,9 @@ def add_expense():
                 display_records_table()
             except:
                 mb.showerror('Error!','The type of the values entered is not accurate. Please try again!')
+                reset_fields()
         else:
-            mb.showerror('Error!','The type of the values entered is not accurate. Please try again!')
+            mb.showerror('Error!','Only whole numbers are allowed. Please try again!')
             reset_fields()
 
 # Initializing the GUI window
@@ -577,22 +652,31 @@ tree.column('#5', minwidth=200, width=200, stretch=NO)
 tree.place_forget()
 
 # budget label
-current_budget = connector.execute('SELECT budget FROM users').fetchall()
-total_spending = connector.execute('SELECT SUM(amount) FROM expenses').fetchall()
-budget_label = Label(center_frame, text=f'Current Budget: ${current_budget[0][0]}, Total Spending: ${total_spending[0][0]}', font=labelfont, bg='SkyBlue2')
-budget_label.place_forget()
 
-over_under_label = Label(center_frame, text=f'Over Budget', font=labelfont, bg='SkyBlue2')
-if current_budget[0][0] > total_spending[0][0]:
-    over_under_label.config(foreground='DarkGreen')
-    over_under_label['text'] = 'Under Budget'
-elif current_budget[0][0] < total_spending[0][0]:
-    over_under_label.config(foreground='Red')
-    over_under_label['text'] = 'Over Budget'
+total_spending = connector.execute('SELECT SUM(amount) FROM expenses').fetchall()
+
+if total_spending[0][0] == None:
+    current_budget = connector.execute('SELECT budget FROM users').fetchall()
+    budget_label = Label(center_frame, text=f'Current Budget: ${current_budget[0][0]}', font=labelfont, bg='SkyBlue2')
+    budget_label.place_forget()
+
+    over_under_label = Label(center_frame, text=f'Over or Under Budget?', font=labelfont, bg='SkyBlue2')
+    over_under_label.place_forget()
 else:
-    over_under_label.config(foreground='Black')
-    over_under_label['text'] = 'Break Even'
-over_under_label.place_forget()
+    current_budget = connector.execute('SELECT budget FROM users').fetchall()
+    budget_label = Label(center_frame, text=f'Current Budget: ${current_budget[0][0]}', font=labelfont, bg='SkyBlue2')
+    budget_label.place_forget()
+    over_under_label = Label(center_frame, text=f'Over or Under Budget?', font=labelfont, bg='SkyBlue2')
+    if current_budget[0][0] > total_spending[0][0]:
+        over_under_label.config(foreground='DarkGreen')
+        over_under_label['text'] = 'Under Budget'
+    if current_budget[0][0] < total_spending[0][0]:
+        over_under_label.config(foreground='Red')
+        over_under_label['text'] = 'Over Budget'
+    else:
+        over_under_label.config(foreground='Black')
+        over_under_label['text'] = 'Break Even'
+    over_under_label.place_forget()
 
 # RIGHT SIDE
 
